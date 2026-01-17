@@ -1,5 +1,7 @@
 import cv2
 import mediapipe as mp
+from calculate_angles import angles_from_landmarks
+import numpy as np
 
 # Initialize MediaPipe Pose and Drawing utilities
 mp_pose = mp.solutions.pose
@@ -41,6 +43,22 @@ while cap.isOpened():
             mp_drawing.DrawingSpec(color=(0, 0, 255), thickness=2, circle_radius=1)
         )
 
+        landmarks = results.pose_landmarks.landmark
+    
+        angles = angles_from_landmarks(landmarks)
+
+        # Display angles on their corresponding joints
+        for joint_id, angle in angles.items():
+            joint_idx = int(joint_id)
+            if joint_idx < len(landmarks):
+                landmark = landmarks[joint_idx]
+                x = int(landmark.x * image.shape[1])
+                y = int(landmark.y * image.shape[0])
+                cv2.putText(image, f"{int(angle)}", 
+                            (x + 10, y - 10), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
+
+    
     # Display the resulting frame
     cv2.imshow('Real-Time Pose Tracking', image)
 
